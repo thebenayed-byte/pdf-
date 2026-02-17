@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Générateur de PDF + Lecteur YouTube</title>
+<title>Générateur PDF + YouTube</title>
 <style>
 :root {
   --main-color: #4f46e5;
@@ -12,7 +12,7 @@
   --text-color: #ffffff;
 }
 
-* { box-sizing: border-box; margin: 0; padding: 0; font-family: Arial, sans-serif; }
+* { box-sizing: border-box; margin:0; padding:0; font-family: Arial,sans-serif; }
 
 body {
   background-color: var(--bg-color);
@@ -48,17 +48,18 @@ h1 {
   min-width: 300px;
 }
 
-textarea {
+textarea, input[type="text"], select {
   width: 100%;
-  height: 200px;
+  padding: 10px;
   border-radius: 8px;
   border: none;
-  padding: 10px;
-  font-size: 16px;
-  resize: none;
+  margin-top: 5px;
+  margin-bottom: 10px;
   background-color: #2a2a2a;
   color: var(--text-color);
 }
+
+textarea { height: 200px; resize: none; font-size: 16px; }
 
 button {
   background-color: var(--main-color);
@@ -68,24 +69,14 @@ button {
   border-radius: 8px;
   cursor: pointer;
   font-size: 16px;
-  margin-top: 10px;
+  margin-top: 5px;
   width: 100%;
   transition: background 0.3s;
 }
 
-button:hover {
-  background-color: #3b36c4;
-}
+button:hover { background-color: #3b36c4; }
 
-input[type="text"] {
-  width: 100%;
-  padding: 10px;
-  border-radius: 8px;
-  border: none;
-  margin-bottom: 10px;
-  background-color: #2a2a2a;
-  color: var(--text-color);
-}
+#download-media { background-color: #f59e0b; }
 
 iframe {
   width: 100%;
@@ -112,19 +103,17 @@ iframe {
 <h1>Générateur de PDF + Lecteur YouTube</h1>
 
 <div class="container">
-  <!-- Zone de texte + génération PDF -->
+  <!-- Zone texte / PDF -->
   <div class="card">
     <label for="content">Écris ton texte ou tes listes :</label>
     <textarea id="content" placeholder="Exemple : Tâches, CV, Notes..."></textarea>
     <button id="generate">Générer le PDF</button>
-    <div style="margin-top:10px;">
-      <label for="template">Choisir un style :</label>
-      <select id="template" style="width: 100%; padding: 10px; border-radius: 8px; border: none; margin-top: 5px; background-color: #2a2a2a; color: white;">
-        <option value="classic">Classique</option>
-        <option value="modern">Moderne</option>
-        <option value="minimal">Minimal</option>
-      </select>
-    </div>
+    <label for="template">Choisir un style :</label>
+    <select id="template">
+      <option value="classic">Classique</option>
+      <option value="modern">Moderne</option>
+      <option value="minimal">Minimal</option>
+    </select>
   </div>
 
   <!-- Zone YouTube -->
@@ -133,11 +122,12 @@ iframe {
     <input type="text" id="youtube-link" placeholder="Colle le lien ici">
     <button id="load-video">Lire la vidéo</button>
     <iframe id="youtube-player" src="" allowfullscreen></iframe>
+    <button id="download-media">Télécharger Vidéo/Audio</button>
   </div>
 </div>
 
 <div class="footer">
-  &copy; 2026 Générateur de PDF | Développé par <a href="mailto:TheBenayed@gmail.com" style="color: var(--main-color); text-decoration: none;">TheBenayed@gmail.com</a>
+  &copy; 2026 Générateur PDF | Développé par <a href="mailto:TheBenayed@gmail.com" style="color: var(--main-color); text-decoration: none;">TheBenayed@gmail.com</a>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -148,7 +138,6 @@ const { jsPDF } = window.jspdf;
 document.getElementById("generate").addEventListener("click", () => {
   const content = document.getElementById("content").value.trim();
   const template = document.getElementById("template").value;
-
   if(!content) { alert("Merci d'écrire quelque chose avant de générer le PDF !"); return; }
 
   const doc = new jsPDF();
@@ -165,19 +154,22 @@ document.getElementById("generate").addEventListener("click", () => {
 document.getElementById("load-video").addEventListener("click", () => {
   const link = document.getElementById("youtube-link").value.trim();
   if(!link) return alert("Merci de coller un lien YouTube !");
-  
-  // Extraire l'ID de la vidéo
   let videoId = "";
   try {
     const url = new URL(link);
     if(url.hostname.includes("youtu.be")) videoId = url.pathname.slice(1);
     else if(url.hostname.includes("youtube.com")) videoId = url.searchParams.get("v");
   } catch(e) { return alert("Lien YouTube invalide."); }
-
   if(!videoId) return alert("Impossible de trouver la vidéo sur ce lien.");
+  document.getElementById("youtube-player").src = `https://www.youtube.com/embed/${videoId}`;
+});
 
-  const player = document.getElementById("youtube-player");
-  player.src = `https://www.youtube.com/embed/${videoId}`;
+// Télécharger vidéo/audio via service tiers
+document.getElementById("download-media").addEventListener("click", () => {
+  const link = document.getElementById("youtube-link").value.trim();
+  if(!link) return alert("Merci de coller un lien YouTube !");
+  const url = "https://yt1s.com/en1?q=" + encodeURIComponent(link);
+  window.open(url, "_blank");
 });
 </script>
 
